@@ -49,6 +49,8 @@
     "cookie-parser": "^1.4.3",
     "css-loader": "^0.26.1",
     "deepstream.io-client-js": "^2.1.1",
+    "deepstream.io-provider-search-rethinkdb": "^2.0.0",
+    "eslint": "^3.13.1",
     "express": "^4.14.0",
     "lodash": "^4.17.4",
     "materialize-css": "^0.97.8",

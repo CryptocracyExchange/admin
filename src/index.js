@@ -16,7 +16,6 @@ const auth = process.env.NODE_ENV === 'prod' ? {
 const connect = deepstream(`${deepstreamServer}:6020`).login(auth);
 
 const app = express();
-
 app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use('/', express.static(path.join(__dirname, '../public')));
@@ -42,30 +41,6 @@ app.listen(port, () => {
 // console.log(x);
 // shell.echo('Nick is in the closet');
 // shell.exec('node --version', {async: true}).stdout;
-
-/** Delete List(s) **/
-// Accepts a list of list names
-const deleteList = (t) => {
-  let entDelete = (l) => {
-    connect.record.getList(l).whenReady((list) => {
-      let entries = list.getEntries();
-      for (var j = 0; j < entries.length; j++) {
-        connect.record.getRecord(entries[j]).whenReady((rec) => {
-          rec.delete();
-        });
-      }
-      list.delete();
-    });
-  };
-  for (var x = 0; x < t.length; x++) {
-    if (t[x] === 'open') {
-      entDelete('openBuy')
-      entDelete('openSell');
-    } else if (t[x] === 'closed') {
-      entDelete('transactionHistory');
-    }
-  }
-};
 
 /** Delete deepstream_records **/
 // const deleteRecords = (r) => {
@@ -139,7 +114,3 @@ getLists(transactionHistory, 'transaction history');
 // delete every list
 // deleteList(['open', 'closed']);
 /** END OF TEST **/
-
-module.exports = {
-  deleteList: deleteList
-};

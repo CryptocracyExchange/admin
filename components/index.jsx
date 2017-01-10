@@ -4,13 +4,9 @@ import ReactDom from 'react-dom';
 const url = 'localhost';
 const client = require('deepstream.io-client-js')(`${url}:6020`);
 const chalk = require('chalk');
-import { deleteList } from '../src/index.js';
 import _ from 'lodash';
 
 import { Row, Input, Navbar, NavItem, Icon, Button, Col } from 'react-materialize';
-
-
-
 
 client.login();
 
@@ -22,7 +18,7 @@ const auth = process.env.NODE_ENV === 'prod' ? {
 class Admin extends React.Component {
   constructor(props) {
     super(props);
-  
+
     this.state = {
       options: [],
       balanceOptions: {},
@@ -31,8 +27,28 @@ class Admin extends React.Component {
     this.balanceListener();
 
   }
-
-
+  // delete lists
+  deleteList(t) {
+    let entDelete = (l) => {
+      client.record.getList(l).whenReady((list) => {
+        let entries = list.getEntries();
+        for (var j = 0; j < entries.length; j++) {
+          client.record.getRecord(entries[j]).whenReady((rec) => {
+            rec.delete();
+          });
+        }
+        list.delete();
+      });
+    };
+    for (var x = 0; x < t.length; x++) {
+      if (t[x] === 'open') {
+        entDelete('openBuy')
+        entDelete('openSell');
+      } else if (t[x] === 'closed') {
+        entDelete('transactionHistory');
+      }
+    }
+  }
 
   checkHandler(e) {
     console.log('check', e.target.value)
@@ -50,7 +66,7 @@ class Admin extends React.Component {
 
 clickHandler() {
   console.log('opt', this.state.options);
-  deleteList(this.state.options);
+  this.deleteList(this.state.options);
 }
 
 
@@ -60,7 +76,7 @@ checkBalance() {
   client.event.emit('checkBalance', this.state.balanceOptions);
 }
 
-updateBalance() {  
+updateBalance() {
   console.log('balanceOptions', this.state.balanceOptions);
   client.event.emit('updateBalance', this.state.balanceOptions);
 }
@@ -139,7 +155,7 @@ transactionHandler(type) {
         &nbsp;&nbsp;
         <Button onClick={() => this.transactionHandler('Sell')}>Sell</Button>
       </Col>
-    ); 
+    );
 
     return (
       <div>
@@ -148,12 +164,12 @@ transactionHandler(type) {
           <NavItem href='get-started.html'><Icon>more_vert</Icon></NavItem>
       </Navbar>
       <Row>
-          
+
         {listDropper}
-        
+
 
         {balances}
-    
+
 
         {trades}
       </Row>
