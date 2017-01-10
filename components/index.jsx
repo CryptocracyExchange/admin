@@ -10,12 +10,10 @@ const auth = process.env.NODE_ENV === 'prod' ? {
   password: process.env.DEEPSTREAM_AUTH_PASSWORD } : {};
 
 class Admin extends Component {
-  
-
   render() {
     return (
       <div>
-        
+        Hi!
       </div>
     );
   }
@@ -23,4 +21,4 @@ class Admin extends Component {
 
 export default Admin;
 
-ReactDom.render( document.getElementById('app'))
+ReactDom.render(<Admin />, document.getElementById('app'))
