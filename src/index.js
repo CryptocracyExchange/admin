@@ -23,7 +23,7 @@ app.use('/', express.static(path.join(__dirname, '../public')));
 const port = process.env.PORT;
 
 app.listen(port, () => {
-  console.log(chalk.magenta(`admin on ${port}!///////////////`));
+  // console.log(chalk.cyan(`admin on ${port}!///////////////`));
 });
 
 // Connect to rethinkdb
