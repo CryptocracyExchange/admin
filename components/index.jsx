@@ -8,12 +8,11 @@ import _ from 'lodash';
 
 import { Row, Input, Navbar, NavItem, Icon, Button, Col } from 'react-materialize';
 
-client.login();
-
-const auth = process.env.NODE_ENV === 'prod' ? {
+client.login({
   role: process.env.DEEPSTREAM_AUTH_ROLE,
   username: process.env.DEEPSTREAM_AUTH_USERNAME,
-  password: process.env.DEEPSTREAM_AUTH_PASSWORD } : {};
+  password: process.env.DEEPSTREAM_AUTH_PASSWORD 
+});
 
 class Admin extends React.Component {
   constructor(props) {
