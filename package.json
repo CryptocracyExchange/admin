@@ -11,7 +11,7 @@
     "start-watch": "nodemon ./src/index.js",
     "start-webpack": "node_modules/webpack/bin/webpack.js --config webpack.config.js --progress --colors --watch",
     "build": "node_modules/webpack/bin/webpack.js --config webpack.config.js --progress --colors",
-    "start-dev": "node ./src/search-provider.js & NODE_ENV=dev npm run start-watch & npm run start-webpack"
+    "start-dev": "node ./src/search-provider.js & NODE_ENV=dev npm run start-watch & PORT=3005 npm run start-webpack"
   },
   "repository": {
     "type": "git",

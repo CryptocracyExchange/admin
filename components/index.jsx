@@ -12,7 +12,7 @@ import { Row, Input, Navbar, NavItem, Icon, Button, Col } from 'react-materializ
 client.login({
   role: process.env.DEEPSTREAM_AUTH_ROLE,
   username: process.env.DEEPSTREAM_AUTH_USERNAME,
-  password: process.env.DEEPSTREAM_AUTH_PASSWORD 
+  password: process.env.DEEPSTREAM_AUTH_PASSWORD
 });
 
 class Admin extends React.Component {
