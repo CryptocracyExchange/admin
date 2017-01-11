@@ -20,6 +20,6 @@ deployment:
     branch: master
     commands:
       - docker info
-      - docker build --rm=false -t cryptocracy/wallets .
+      - docker build --rm=false -t cryptocracy/admin .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push cryptocracy/wallets
+      - docker push cryptocracy/admin
