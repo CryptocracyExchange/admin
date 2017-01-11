@@ -4,6 +4,7 @@ import ReactDom from 'react-dom';
 const url = 'localhost';
 const client = require('deepstream.io-client-js')(`${url}:6020`);
 const chalk = require('chalk');
+
 import _ from 'lodash';
 
 import { Row, Input, Navbar, NavItem, Icon, Button, Col } from 'react-materialize';
@@ -20,7 +21,7 @@ class Admin extends React.Component {
 
     this.state = {
       options: [],
-      balanceOptions: {},
+      balanceOptions: { isExternal: false },
       tradeOptions: {}
     };
     this.balanceListener();
@@ -96,7 +97,13 @@ inputHandler(e, input) {
   change.balanceOptions[input] = value;
   this.setState(change);
 }
+checkExternal() {
+  let change = _.extend({}, this.state);
+  change.balanceOptions.isExternal = !this.state.balanceOptions.isExternal;
+  this.setState(change);
+}
 
+//TRADES
 tradeHandler(e, input) {
   let value = e.target.value;
   if (input === 'currency') {
@@ -135,6 +142,8 @@ transactionHandler(type) {
         <Input onChange={(e) => this.inputHandler(e, 'userID')} placeholder="userID" className="user" />
         <Input onChange={(e) => this.inputHandler(e, 'currency')} placeholder="currency" className="currency" />
         <Input onChange={(e) => this.inputHandler(e, 'update')} placeholder="update" className="update" />
+        <Input onChange={(e) => this.inputHandler(e, 'balanceType')} placeholder="available or actual" className="baltype" />
+        <Input name='group2' type='checkbox' onChange={() => this.checkExternal()} value='external' label='external' />
         <Button onClick={() => this.checkBalance()}>Check Balance</Button>
         <br/><br/>
         <Button onClick={() => this.updateBalance()}>Update Balance</Button>
@@ -161,6 +170,7 @@ transactionHandler(type) {
         <Navbar brand='devTools' right>
           <NavItem href='get-started.html'><Icon>refresh</Icon></NavItem>
           <NavItem href='get-started.html'><Icon>more_vert</Icon></NavItem>
+<<<<<<< HEAD
       </Navbar>
       <Row>
 
@@ -172,6 +182,14 @@ transactionHandler(type) {
 
         {trades}
       </Row>
+=======
+        </Navbar>
+        <Row>
+          {listDropper}
+          {balances}
+          {trades}
+        </Row>
+>>>>>>> adds external selector and available vs actual to balance tool
       </div>
     );
   }
