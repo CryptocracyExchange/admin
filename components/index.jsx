@@ -71,6 +71,11 @@ clickHandler() {
 
 
   //BALANCES
+initBalance() {
+  console.log('options', this.state.balanceOptions);
+  client.event.emit('initBalance', this.state.balanceOptions);
+}
+
 checkBalance() {
   console.log('options', this.state.balanceOptions);
   client.event.emit('checkBalance', this.state.balanceOptions);
@@ -144,6 +149,8 @@ transactionHandler(type) {
         <Input onChange={(e) => this.inputHandler(e, 'update')} placeholder="update" className="update" />
         <Input onChange={(e) => this.inputHandler(e, 'balanceType')} placeholder="available or actual" className="baltype" />
         <Input name='group2' type='checkbox' onChange={() => this.checkExternal()} value='external' label='external' />
+        <Button onClick={() => this.initBalance()}>Init Balance</Button>
+        <br/><br/>
         <Button onClick={() => this.checkBalance()}>Check Balance</Button>
         <br/><br/>
         <Button onClick={() => this.updateBalance()}>Update Balance</Button>
@@ -170,26 +177,12 @@ transactionHandler(type) {
         <Navbar brand='devTools' right>
           <NavItem href='get-started.html'><Icon>refresh</Icon></NavItem>
           <NavItem href='get-started.html'><Icon>more_vert</Icon></NavItem>
-<<<<<<< HEAD
-      </Navbar>
-      <Row>
-
-        {listDropper}
-
-
-        {balances}
-
-
-        {trades}
-      </Row>
-=======
         </Navbar>
         <Row>
           {listDropper}
           {balances}
           {trades}
         </Row>
->>>>>>> adds external selector and available vs actual to balance tool
       </div>
     );
   }

@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const chalk = require('chalk');
 const shell = require('shelljs');
-const r = require('rethinkdb');
+// const r = require('rethinkdb');
 
 const deepstream = require('deepstream.io-client-js');
 const deepstreamServer = process.env.NODE_ENV === 'prod' ? 'deepstream' : 'localhost';
@@ -20,10 +20,10 @@ app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use('/', express.static(path.join(__dirname, '../public')));
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3005;
 
 app.listen(port, () => {
-  // console.log(chalk.cyan(`admin on ${port}!///////////////`));
+  console.log(chalk.red(`admin on ${port}!///////////////`));
 });
 
 // Connect to rethinkdb
