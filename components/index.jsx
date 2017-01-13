@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import ReactDom from 'react-dom';
 // const url = '192.241.227.176'; // Need to change to production IP/URL when deploying
 const url = 'localhost';
-const client = require('deepstream.io-client-js')(`${url}:6020`);
+const client = window.deepstream(`${url}:6020`);
 const chalk = require('chalk');
 
 import _ from 'lodash';
@@ -25,6 +25,8 @@ class Admin extends React.Component {
       tradeOptions: {}
     };
     this.balanceListener();
+    this.dataListener();
+
 
   }
   // delete lists
@@ -92,6 +94,12 @@ balanceListener() {
   })
 }
 
+dataListener() {
+  client.event.subscribe('histData', (data) => {
+    console.log('data', data);
+  })
+}
+
 inputHandler(e, input) {
   let value = e.target.value;
   if (input === 'currency') {
@@ -111,7 +119,7 @@ checkExternal() {
 //TRADES
 tradeHandler(e, input) {
   let value = e.target.value;
-  if (input === 'currency') {
+  if (input === 'currFrom' || input === 'currTo') {
     value = value.toUpperCase();
   }
   let change = _.extend({}, this.state);
@@ -119,10 +127,18 @@ tradeHandler(e, input) {
   this.setState(change);
 }
 
-transactionHandler(type) {
-  client.event.emit('transaction' + type, this.state.tradeOptions);
+transactionHandler() {
+  client.event.emit('transaction', this.state.tradeOptions);
 }
 
+getData() {
+  let options = {
+    primaryCurrency: 'BTC',
+    secondaryCurrency: 'LTC'
+  }
+  client.event.emit('getData', options);
+
+}
 
 
   render() {
@@ -142,12 +158,12 @@ transactionHandler(type) {
     const balances = (
       <Col s={3} className='balances'>
         Check & Update Balances
-        (currency types in all CAPS)
         <br/><br/>
         <Input onChange={(e) => this.inputHandler(e, 'userID')} placeholder="userID" className="user" />
         <Input onChange={(e) => this.inputHandler(e, 'currency')} placeholder="currency" className="currency" />
         <Input onChange={(e) => this.inputHandler(e, 'update')} placeholder="update" className="update" />
-        <Input onChange={(e) => this.inputHandler(e, 'balanceType')} placeholder="available or actual" className="baltype" />
+        <Input name='group2' type='checkbox' onChange={(e) => this.inputHandler(e, 'balanceType')} value='available' label='available' />
+        <Input name='group2' type='checkbox' onChange={(e) => this.inputHandler(e, 'balanceType')} value='actual' label='actual' />
         <Input name='group2' type='checkbox' onChange={() => this.checkExternal()} value='external' label='external' />
         <Button onClick={() => this.initBalance()}>Init Balance</Button>
         <br/><br/>
@@ -160,17 +176,21 @@ transactionHandler(type) {
     const trades = (
        <Col s={3} className='balances'>
         Buy & Sell Transactions
-        (currency types in all CAPS)
         <br/><br/>
         <Input onChange={(e) => this.tradeHandler(e, 'userID')} placeholder="userID" className="userID" />
-        <Input onChange={(e) => this.tradeHandler(e, 'currency')} placeholder="currency" className="currency" />
+        <Input onChange={(e) => this.tradeHandler(e, 'currFrom')} placeholder="currency from" className="currency" />
+        <Input onChange={(e) => this.tradeHandler(e, 'currTo')} placeholder="currency to" className="currency" />
         <Input onChange={(e) => this.tradeHandler(e, 'price')} placeholder="price" className="price" />
         <Input onChange={(e) => this.tradeHandler(e, 'amount')} placeholder="amount" className="amount" />
-        <Button onClick={() => this.transactionHandler('Buy')}>Buy</Button>
+        <Button onClick={() => this.transactionHandler()}>Buy</Button>
         &nbsp;&nbsp;
-        <Button onClick={() => this.transactionHandler('Sell')}>Sell</Button>
+        <Button onClick={() => this.transactionHandler()}>Sell</Button>
       </Col>
     );
+
+    const data = (
+        <Button onClick={() => this.getData()}>Get Data!</Button>
+      )
 
     return (
       <div>
@@ -182,6 +202,7 @@ transactionHandler(type) {
           {listDropper}
           {balances}
           {trades}
+          {data}
         </Row>
       </div>
     );
