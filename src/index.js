@@ -26,32 +26,6 @@ app.listen(port, () => {
   console.log(chalk.red(`admin on ${port}!///////////////`));
 });
 
-// Connect to rethinkdb
-// r.connect({
-//     db: 'Pandas_MacBook_Air_local_by7'
-// }, function(err, conn) {
-//     // ...
-//     if (err) {
-//       console.log('err', err);
-//     } else {
-//       console.log('connected to db!');
-//     }
-// });
-// var x = r.db('Pandas_MacBook_Air_local_by7').tableList();
-// console.log(x);
-// shell.echo('Nick is in the closet');
-// shell.exec('node --version', {async: true}).stdout;
-
-/** Delete deepstream_records **/
-// const deleteRecords = (r) => {
-//
-//   // delete deepstream_record
-//   connect.record.getRecord(/^open\/.*/).whenReady((recrec) => {
-//     console.log(recrec.get());
-//   });
-// }
-/** TEST **/
-
 // Function that creates a sample list
 const createTestList = (x, type, num, user, currency) => {
   x.whenReady((newList) => {
@@ -96,19 +70,19 @@ const getLists = (x, whatList) => {
 /** Create OPEN and CLOSED lists **/
 /** Display OPEN and CLOSED lists **/
 // Open Buy Orders
-let openBuy = connect.record.getList('openBuy');
+let openOrders = connect.record.getList('openOrders');
 // Open Sell Orders
-let openSell = connect.record.getList('openSell');
+// let openSell = connect.record.getList('openSell');
 // Transaction History
 let transactionHistory = connect.record.getList('transactionHistory');
 
 // Create a sample list
-// createTestList(openSell, 'sell', 5, 'nick', 'BTC');
-// createTestList(openBuy, 'buy', 5, 'harry', 'BTC');
+// createTestList(openOrders, 'sell', 5, 'nick', 'BTC');
+// createTestList(openOrders, 'buy', 5, 'harry', 'BTC');
 
 // console each list
-getLists(openBuy, 'buy');
-getLists(openSell, 'sell');
+// getLists(openOrders, 'buy');
+getLists(openOrders, 'open orders');
 getLists(transactionHistory, 'transaction history');
 
 // delete every list

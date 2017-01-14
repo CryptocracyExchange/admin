@@ -44,8 +44,8 @@ class Admin extends React.Component {
     };
     for (var x = 0; x < t.length; x++) {
       if (t[x] === 'open') {
-        entDelete('openBuy')
-        entDelete('openSell');
+        entDelete('openOrders')
+        // entDelete('openSell');
       } else if (t[x] === 'closed') {
         entDelete('transactionHistory');
       }
@@ -127,7 +127,9 @@ tradeHandler(e, input) {
   this.setState(change);
 }
 
-transactionHandler() {
+
+transactionHandler(type) {
+  this.state.tradeOptions.type = type
   client.event.emit('transaction', this.state.tradeOptions);
 }
 
@@ -181,10 +183,11 @@ getData() {
         <Input onChange={(e) => this.tradeHandler(e, 'currFrom')} placeholder="currency from" className="currency" />
         <Input onChange={(e) => this.tradeHandler(e, 'currTo')} placeholder="currency to" className="currency" />
         <Input onChange={(e) => this.tradeHandler(e, 'price')} placeholder="price" className="price" />
+        <Input onChange={(e) => this.tradeHandler(e, 'balanceType')} placeholder="available or actual" className="baltype" />
         <Input onChange={(e) => this.tradeHandler(e, 'amount')} placeholder="amount" className="amount" />
-        <Button onClick={() => this.transactionHandler()}>Buy</Button>
+        <Button onClick={() => this.transactionHandler('buy')}>Buy</Button>
         &nbsp;&nbsp;
-        <Button onClick={() => this.transactionHandler()}>Sell</Button>
+        <Button onClick={() => this.transactionHandler('sell')}>Sell</Button>
       </Col>
     );
 
