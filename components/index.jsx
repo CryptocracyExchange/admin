@@ -1,18 +1,16 @@
 import React, {Component} from 'react';
 import ReactDom from 'react-dom';
+import _ from 'lodash';
+import { Row, Input, Navbar, NavItem, Icon, Button, Col } from 'react-materialize';
+
 // const url = '192.241.227.176'; // Need to change to production IP/URL when deploying
 const url = 'localhost';
 const client = window.deepstream(`${url}:6020`);
-const chalk = require('chalk');
-
-import _ from 'lodash';
-
-import { Row, Input, Navbar, NavItem, Icon, Button, Col } from 'react-materialize';
 
 client.login({
-  role: process.env.DEEPSTREAM_AUTH_ROLE,
-  username: process.env.DEEPSTREAM_AUTH_USERNAME,
-  password: process.env.DEEPSTREAM_AUTH_PASSWORD
+  role: process.env.DEEPSTREAM_AUTH_ROLE || 'provider',
+  username: process.env.DEEPSTREAM_AUTH_USERNAME || 'admin-service',
+  password: process.env.DEEPSTREAM_AUTH_PASSWORD || '12345'
 });
 
 class Admin extends React.Component {
@@ -215,3 +213,7 @@ getData() {
 export default Admin;
 
 ReactDom.render(<Admin />, document.getElementById('app'))
+
+if (module.hot) {
+  module.hot.accept();
+}

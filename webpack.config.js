@@ -2,8 +2,8 @@ var path = require('path');
 
 var webpack = require('webpack');
 
-module.exports = {
-  entry: './components/index.jsx',
+const config = {
+  entry: ['./components/index.jsx'],
   output: {
     path: path.resolve(__dirname, 'public/scripts'),
     filename: 'bundle.js'
@@ -12,11 +12,8 @@ module.exports = {
     loaders: [
       {
         test: /.jsx?$/,
-        loader: 'babel-loader',
-        exclude: /node_modules/,
-        query: {
-          presets: ['es2015', 'react']
-        }
+        loaders: ['babel-loader?{"presets":["es2015","react"]}'],
+        exclude: /node_modules/
       }
     ]
   },
@@ -42,3 +39,18 @@ module.exports = {
   //   new webpack.optimize.AggressiveMergingPlugin()  // Merge chunks 
   // ]
 };
+
+if (process.env.NODE_ENV !== 'prod') {
+  config.entry.unshift(
+    'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',
+    'webpack/hot/only-dev-server'
+    );
+  config.module.loaders[0].loaders.unshift('react-hot');
+  config.plugins = [
+    new webpack.optimize.OccurenceOrderPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NoErrorsPlugin()
+  ];
+}
+
+module.exports = config;
