@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import ReactDom from 'react-dom';
 import _ from 'lodash';
-import { Row, Input, Navbar, NavItem, Icon, Button, Col, CollectionItem, Collection } from 'react-materialize';
+import { Row, Input, Navbar, NavItem, Icon, Button, Badge, Col, CollectionItem, Collection } from 'react-materialize';
 import request from 'superagent';
 
 // const url = '192.241.227.176'; // Need to change to production IP/URL when deploying
@@ -18,7 +18,9 @@ class Admin extends React.Component {
       tradeOptions: {},
       userData: {},
       userNames: [],
-      numberOfUsers: 0
+      numberOfUsers: 0,
+      autotradeTimeoutID: 0,
+      numberOfAutotrades: 0
     };
     this.balanceListener();
     this.dataListener();
@@ -54,7 +56,8 @@ class Admin extends React.Component {
                 email: userData.email,
                 BTC: {actual: userBalances.BTC.actual, available: userBalances.BTC.available},
                 LTC: {actual: userBalances.LTC.actual, available: userBalances.LTC.available},
-                DOGE: {actual: userBalances.DOGE.actual, available: userBalances.DOGE.available}
+                DOGE: {actual: userBalances.DOGE.actual, available: userBalances.DOGE.available},
+                trades: 0
               };
               const change = _.extend(newUser, this.state.userData);
               this.setState({userData: change});
@@ -169,8 +172,104 @@ class Admin extends React.Component {
   }
 
   transactionHandler(type) {
+    console.log(this.state.tradeOptions);
     this.state.tradeOptions.type = type
     client.event.emit('transaction', this.state.tradeOptions);
+  }
+
+  // Automated Trades
+
+  automatedTrading () {
+    if (this.state.autotradeTimeoutID !== 0) {
+      clearTimeout(this.state.autotradeTimeoutID);
+      this.setState({autotradeTimeoutID: 0}); 
+    } else {
+      // Implement big to handle these numbers...
+      const pairs = {
+        BTCLTC: {
+          lastPrice: 0.00453114, // BTC for 1 LTC
+          gMax: 0.006,
+          gMin: 0.003
+        },
+        DOGEBTC: {
+          lastPrice: 4167348, // DOGE for 1 BTC
+          gMax: 5000000,
+          gMin: 3000000
+        },
+        DOGELTC: {
+          lastPrice: 18937, // DOGE for 1 LTC
+          gMax: 20000,
+          gMin: 16000
+        }
+      }
+
+      var username;
+
+      const generateTradeData = () => {
+        const getRandom = (min, max) => {
+          min = Math.ceil(min);
+          max = Math.floor(max);
+          return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        // randomly pick a user from the list of users in state
+        const userName = this.state.userNames[getRandom(0, this.state.userNames.length - 1)];
+        // randomly pick a 'from' currency
+        const currencies = ["BTC", "LTC", "DOGE"];
+        const fromCurrency = currencies.splice(getRandom(0, currencies.length - 1), 1)[0];
+        // randomly pick a 'to' currency
+        const toCurrency = currencies.splice(getRandom(0, currencies.length - 1), 1)[0];
+        const pairName = ["BTCLTC", "DOGEBTC", "DOGELTC"].filter((pair) => {
+          const map = {};
+          if (pair[0] === 'D') {
+            map.DOGE = true;
+            if (pair[4] === 'B') {
+              map.BTC = true;
+            } else {
+              map.LTC = true;
+            }
+          } else {
+            map.BTC = true;
+            map.LTC = true;
+          }
+          return map.hasOwnProperty(fromCurrency) && map.hasOwnProperty(toCurrency);
+        })[0]; // find matching pair name for obj lookup
+        // new lMax = (gMax - lastPrice)(random % between 10 and 25)
+        const lMax = (pairs[pairName].gMax - pairs[pairName].lastPrice)*(getRandom(10, 25) / 100);
+        // new lMin = (lastPrice - gMin)(random % between 10 and 25)
+        const lMin = (pairs[pairName].lastPrice - pairs[pairName].gMin)*(getRandom(10, 25) / 100);
+        // new order price = random number between lMax and lMin
+        const price = getRandom(lMin, lMax);
+        const amount = getRandom(1, 1000); // Could base this off of the relative price of a pair...
+        const type = getRandom(0,1) === 0 ? 'buy' : 'sell'; // This may be too biased...
+        return {
+          price: price,
+          userID: userName,
+          currFrom: fromCurrency,
+          currTo: toCurrency,
+          amount: amount,
+          type: type
+        }
+      }
+
+      const loopCallback = () => {
+        const tradeData = generateTradeData();
+        console.log(tradeData);
+        client.event.emit('transaction', tradeData);
+        const change = _.extend({}, this.state);
+        change.numberOfAutotrades++;
+        change.userData[tradeData.userID].trades++;
+        this.setState(change);
+        loop();
+      };
+
+      const loop = () => {
+        const randomTime = Math.round(Math.random() * (2000 - 300));
+        const id = setTimeout(loopCallback.bind(this), randomTime);
+        this.setState({autotradeTimeoutID: id});
+      };
+
+      loop();
+    }
   }
 
 // getData() {
@@ -206,7 +305,7 @@ class Admin extends React.Component {
                       userID: user.login.username,
                       isExternal: true,
                       currency: currencyType,
-                      update: "100000"
+                      update: currencyType === "DOGE" ? "10000000" : currencyType === "LTC" ? "100000" : "10000"
                     });
                   })
                 }
@@ -226,40 +325,71 @@ class Admin extends React.Component {
 
   render() {
     const UserList = (
-      <div>
-        <Collection>
-          {this.state.userNames.map((userName, key) => {
-            return (
-            <CollectionItem key={key}>
-              <Row>
-                <Col>
-                  {this.state.userData[userName].username}
-                  <br />
-                  {this.state.userData[userName].email}
-                </Col>
-                <Col>
-                  BTC: {this.state.userData[userName].BTC.available}
-                  <br />
-                  LTC: {this.state.userData[userName].LTC.available}
-                  <br />
-                  DOGE: {this.state.userData[userName].DOGE.available}
-                </Col>
-              </Row>
-            </CollectionItem>
-            )
-          })}
-        </ Collection>
-      </div>
+      <Row>
+        <Col s={12}>
+          <div className='z-depth-3'>
+            <Collection>
+              {this.state.userNames.map((userName, key) => {
+                return (
+                <CollectionItem key={key}>
+                  <Row>
+                    <Col s={4}>
+                      {this.state.userData[userName].username}
+                      <br />
+                      {this.state.userData[userName].email}
+                    </Col>
+                    <Col s={4}>
+                      BTC: {this.state.userData[userName].BTC.available}
+                      <br />
+                      LTC: {this.state.userData[userName].LTC.available}
+                      <br />
+                      DOGE: {this.state.userData[userName].DOGE.available}
+                    </Col>
+                    <Col s={4}>
+                      <Badge newIcon>Trades: {this.state.userData[userName].trades}</Badge>
+                    </Col>
+                  </Row>
+                </CollectionItem>
+                )
+              })}
+            </ Collection>
+          </div>
+        </Col>
+      </Row>
     );
 
     const GenerateUsers = (
-      <Col s={12}>
-        <Input
-          onChange={(e) => { this.numberOfUsersToGenerateHandler(e) }}
-          label="Number of Users (max 5000)"
-          s={12}
-          />
-        <Button onClick={() => { this.generateUsersClickHandler() }}>Generate Users</Button>
+      <Col s={6}>
+        <div className='z-depth-3'>
+          <h5 className='center'>
+            Generate Random Users
+          </h5>
+          <Input
+            onChange={(e) => { this.numberOfUsersToGenerateHandler(e) }}
+            label="Number of Users (max 5000)"
+            s={12}
+            />
+          <Button onClick={() => { this.generateUsersClickHandler() }}>Generate Users</Button>
+        </div>
+      </Col>
+    );
+
+    const AutoTrade = (
+      <Col s={6}>
+        <div className='z-depth-3'>
+          <h5 className='center'>
+            Auto Trade
+          </h5>
+          <Button
+            floating
+            large
+            waves='light'
+            className={this.state.autotradeTimeoutID === 0 ? 'green' : 'red'}
+            icon={this.state.autotradeTimeoutID === 0 ? 'play_arrow' : 'pause'}
+            onClick={this.automatedTrading.bind(this)}
+            />
+          <Badge newIcon>{this.state.numberOfAutotrades}</Badge>
+        </div>
       </Col>
     );
 
@@ -319,16 +449,11 @@ class Admin extends React.Component {
         <Navbar brand='devTools' />
         <br /><br />
         <Row>
-          <Col s={6}>
             <h4>Users</h4>
             {GenerateUsers}
-            <br />
+            {AutoTrade}
+            <br /><br />
             {UserList}
-          </Col>
-          <Col s={6}>
-            <h4>Automated Trades</h4>
-
-          </Col>
         </Row>
         <Row>
           <Col>
