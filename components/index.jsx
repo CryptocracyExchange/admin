@@ -3,6 +3,7 @@ import ReactDom from 'react-dom';
 import _ from 'lodash';
 import { Row, Input, Navbar, NavItem, Icon, Button, Badge, Col, CollectionItem, Collection } from 'react-materialize';
 import request from 'superagent';
+import big from 'big.js';
 
 // const url = '192.241.227.176'; // Need to change to production IP/URL when deploying
 const url = 'localhost';
@@ -184,7 +185,6 @@ class Admin extends React.Component {
       clearTimeout(this.state.autotradeTimeoutID);
       this.setState({autotradeTimeoutID: 0}); 
     } else {
-      // Implement big to handle these numbers...
       const pairs = {
         BTCLTC: {
           lastPrice: 0.00453114, // BTC for 1 LTC
@@ -206,18 +206,24 @@ class Admin extends React.Component {
       var username;
 
       const generateTradeData = () => {
-        const getRandom = (min, max) => {
+        const getRandomSmallInt = (min, max) => {
+          min = Math.ceil(min);
+          max = Math.floor(max);
+          return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        const getRandomBigInt = (min, max) => {
+          console.log(min, max);
           min = Math.ceil(min);
           max = Math.floor(max);
           return Math.floor(Math.random() * (max - min + 1)) + min;
         }
         // randomly pick a user from the list of users in state
-        const userName = this.state.userNames[getRandom(0, this.state.userNames.length - 1)];
+        const userName = this.state.userNames[getRandomSmallInt(0, this.state.userNames.length - 1)];
         // randomly pick a 'from' currency
         const currencies = ["BTC", "LTC", "DOGE"];
-        const fromCurrency = currencies.splice(getRandom(0, currencies.length - 1), 1)[0];
+        const fromCurrency = currencies.splice(getRandomSmallInt(0, currencies.length - 1), 1)[0];
         // randomly pick a 'to' currency
-        const toCurrency = currencies.splice(getRandom(0, currencies.length - 1), 1)[0];
+        const toCurrency = currencies.splice(getRandomSmallInt(0, currencies.length - 1), 1)[0];
         const pairName = ["BTCLTC", "DOGEBTC", "DOGELTC"].filter((pair) => {
           const map = {};
           if (pair[0] === 'D') {
@@ -234,13 +240,13 @@ class Admin extends React.Component {
           return map.hasOwnProperty(fromCurrency) && map.hasOwnProperty(toCurrency);
         })[0]; // find matching pair name for obj lookup
         // new lMax = (gMax - lastPrice)(random % between 10 and 25)
-        const lMax = (pairs[pairName].gMax - pairs[pairName].lastPrice)*(getRandom(10, 25) / 100);
+        const lMax = (pairs[pairName].gMax - pairs[pairName].lastPrice)*(getRandomSmallInt(10, 25) / 100);
         // new lMin = (lastPrice - gMin)(random % between 10 and 25)
-        const lMin = (pairs[pairName].lastPrice - pairs[pairName].gMin)*(getRandom(10, 25) / 100);
+        const lMin = (pairs[pairName].lastPrice - pairs[pairName].gMin)*(getRandomSmallInt(10, 25) / 100);
         // new order price = random number between lMax and lMin
-        const price = getRandom(lMin, lMax);
-        const amount = getRandom(1, 1000); // Could base this off of the relative price of a pair...
-        const type = getRandom(0,1) === 0 ? 'buy' : 'sell'; // This may be too biased...
+        const price = getRandomBigInt(lMin, lMax);
+        const amount = getRandomSmallInt(1, 1000); // Could base this off of the relative price of a pair...
+        const type = getRandomSmallInt(0,1) === 0 ? 'buy' : 'sell'; // This may be biased...
         return {
           price: price,
           userID: userName,
