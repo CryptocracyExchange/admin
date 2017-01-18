@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { Row, Input, Navbar, NavItem, Icon, Button, Badge, Col, CollectionItem, Collection } from 'react-materialize';
 import request from 'superagent';
 import big from 'big.js';
+import bcrypt from 'bcrypt-nodejs';
 
 // const url = '192.241.227.176'; // Need to change to production IP/URL when deploying
 const url = 'localhost';
@@ -51,18 +52,20 @@ class Admin extends React.Component {
         if (!this.state.userData.hasOwnProperty(userRecordName)) {
           client.record.snapshot(`user/${userRecordName}`, (error, userData) => {
             client.record.snapshot(`balances/${userRecordName}`, (error, userBalances) => {
-              const newUser = {};
-              newUser[userRecordName] = {
-                username: userData.userID,
-                email: userData.email,
-                BTC: {actual: userBalances.BTC.actual, available: userBalances.BTC.available},
-                LTC: {actual: userBalances.LTC.actual, available: userBalances.LTC.available},
-                DOGE: {actual: userBalances.DOGE.actual, available: userBalances.DOGE.available},
-                trades: 0
-              };
-              const change = _.extend(newUser, this.state.userData);
-              this.setState({userData: change});
-              this.setState({userNames: Object.keys(change)});
+              if (!error) {
+                const newUser = {};
+                newUser[userRecordName] = {
+                  username: userData.userID,
+                  email: userData.email,
+                  BTC: {actual: userBalances.BTC.actual, available: userBalances.BTC.available},
+                  LTC: {actual: userBalances.LTC.actual, available: userBalances.LTC.available},
+                  DOGE: {actual: userBalances.DOGE.actual, available: userBalances.DOGE.available},
+                  trades: 0
+                };
+                const change = _.extend(newUser, this.state.userData);
+                this.setState({userData: change});
+                this.setState({userNames: Object.keys(change)});
+              }
             })
           });
         }
@@ -295,26 +298,34 @@ class Admin extends React.Component {
           console.log(res.body.results);
           res.body.results.forEach((user) => {
             client.record.getRecord(`user/${user.login.username}`).whenReady((userRecord) => {
-              userRecord.set({
-                email: user.email,
-                userID: user.login.username,
-                password: user.login.salt + user.login.sha1,
-                originalPW: user.login.password
-              }, (err) => {
-                if (err) {
-                  console.log('Record set with error:', err)
-                } else {
-                  client.event.emit('initBalance', { userID: user.login.username });
-                  const currencies = ["BTC", "LTC", "DOGE"];
-                  currencies.forEach((currencyType) => {
-                    client.event.emit('updateBalance', {
-                      userID: user.login.username,
-                      isExternal: true,
-                      currency: currencyType,
-                      update: currencyType === "DOGE" ? "10000000" : currencyType === "LTC" ? "100000" : "10000"
+              bcrypt.genSalt(10, (error, salt) => {
+                bcrypt.hash(user.login.password, salt, null, (err, hashedPassword) => {
+                  client.record.getRecord(`email/${user.email}`).whenReady((newEmailRecord) => {
+                    newEmailRecord.set('email', user.email);
+                    newEmailRecord.set('password', hashedPassword);
+                    userRecord.set({
+                      email: user.email,
+                      username: user.login.username,
+                      password: hashedPassword,
+                      originalPW: user.login.password
+                    }, (err) => {
+                      if (err) {
+                        console.log('Record set with error:', err)
+                      } else {
+                        client.event.emit('initBalance', { userID: user.login.username });
+                        const currencies = ["BTC", "LTC", "DOGE"];
+                        currencies.forEach((currencyType) => {
+                          client.event.emit('updateBalance', {
+                            userID: user.login.username,
+                            isExternal: true,
+                            currency: currencyType,
+                            update: currencyType === "DOGE" ? "10000000" : currencyType === "LTC" ? "100000" : "10000"
+                          });
+                        })
+                      }
                     });
-                  })
-                }
+                  });
+                });
               });
             })
           })
