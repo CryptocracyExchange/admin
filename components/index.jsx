@@ -243,12 +243,12 @@ class Admin extends React.Component {
           return map.hasOwnProperty(fromCurrency) && map.hasOwnProperty(toCurrency);
         })[0]; // find matching pair name for obj lookup
         // new lMax = (gMax - lastPrice)(random % between 10 and 25)
-        const lMax = (pairs[pairName].gMax - pairs[pairName].lastPrice)*(getRandomSmallInt(10, 25) / 100);
+        const lMax = (pairs[pairName].gMax - pairs[pairName].lastPrice)*(getRandomSmallInt(5, 15) / 100);
         // new lMin = (lastPrice - gMin)(random % between 10 and 25)
-        const lMin = (pairs[pairName].lastPrice - pairs[pairName].gMin)*(getRandomSmallInt(10, 25) / 100);
+        const lMin = (pairs[pairName].lastPrice - pairs[pairName].gMin)*(getRandomSmallInt(5, 15) / 100);
         // new order price = random number between lMax and lMin
         const price = getRandomBigInt(lMin, lMax);
-        const amount = getRandomSmallInt(1, 1000); // Could base this off of the relative price of a pair...
+        const amount = 1; //getRandomSmallInt(1, 10); // Could base this off of the relative price of a pair...
         const type = getRandomSmallInt(0,1) === 0 ? 'buy' : 'sell'; // This may be biased...
         return {
           price: price,
@@ -272,7 +272,7 @@ class Admin extends React.Component {
       };
 
       const loop = () => {
-        const randomTime = Math.round(Math.random() * (2000 - 300));
+        const randomTime = Math.round(Math.random() * (15000 - 300));
         const id = setTimeout(loopCallback.bind(this), randomTime);
         this.setState({autotradeTimeoutID: id});
       };
