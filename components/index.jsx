@@ -281,14 +281,6 @@ class Admin extends React.Component {
     }
   }
 
-// getData() {
-//   let options = {
-//     primaryCurrency: 'BTC',
-//     secondaryCurrency: 'LTC'
-//   }
-//   client.event.emit('getData', options);
-// }
-
   // Users
   generateUsersClickHandler(numberOfUsers) {
     request
@@ -297,13 +289,15 @@ class Admin extends React.Component {
         if(err) { console.log(err) } else {
           console.log(res.body.results);
           res.body.results.forEach((user) => {
-            client.record.getRecord(`user/${user.login.username}`).whenReady((userRecord) => {
+            client.record.getRecord(`user/${user.login.username}`).whenReady((newUserRecord) => {
               bcrypt.genSalt(10, (error, salt) => {
                 bcrypt.hash(user.login.password, salt, null, (err, hashedPassword) => {
                   client.record.getRecord(`email/${user.email}`).whenReady((newEmailRecord) => {
-                    newEmailRecord.set('email', user.email);
-                    newEmailRecord.set('password', hashedPassword);
-                    userRecord.set({
+                    newEmailRecord.set({
+                      email: user.email,
+                      password: hashedPassword
+                    });
+                    newUserRecord.set({
                       email: user.email,
                       username: user.login.username,
                       password: hashedPassword,
@@ -321,7 +315,9 @@ class Admin extends React.Component {
                             currency: currencyType,
                             update: currencyType === "DOGE" ? "10000000" : currencyType === "LTC" ? "100000" : "10000"
                           });
-                        })
+                        });
+                        newUserRecord.discard();
+                        newEmailRecord.discard();
                       }
                     });
                   });
