@@ -6,8 +6,8 @@ import request from 'superagent';
 import big from 'big.js';
 import bcrypt from 'bcrypt-nodejs';
 
-// const url = '192.241.227.176'; // Need to change to production IP/URL when deploying
-const url = 'localhost';
+const url = 'localhost'; // Need to change to production IP/URL when deploying
+// const url = '35.167.204.20';
 const client = window.deepstream(`${url}:6020`);
 
 class Admin extends React.Component {
