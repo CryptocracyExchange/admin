@@ -351,10 +351,17 @@ class Admin extends React.Component {
     var randomElement = function(array){
       var randomIndex = Math.floor(Math.random() * array.length);
         return array[randomIndex];
-    };
+      };
     var randomMessage = function(){
       return [randomElement(opening), randomElement(verbs), randomElement(objects), randomElement(nouns)].join(' ');
-    };
+      };
+
+    const getRandomSmallInt = (min, max) => {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      };
+    const userName = this.state.userNames[getRandomSmallInt(0, this.state.userNames.length - 1)];
     /*for (var i = 0; i < this.state.numberOfMessages; i++) {
       var newMessage = randomMessage();
       storeMessages.push(newMessage);   
@@ -367,7 +374,7 @@ class Admin extends React.Component {
     console.log('newMessage is: ', newMessage);
     const time = Date.now();
     client.event.emit('trollbox-create-message', {
-      userID: 'testUser',
+      userID: userName,
       content: newMessage,
       time: time
     });
