@@ -401,7 +401,7 @@ class Admin extends React.Component {
     })
     console.log('this.state.generateMessages is: ', this.state.generateMessages);
     if (this.state.generateMessages) {
-      let clearId = setInterval( () => this.messageGenerator(), 5000)
+      let clearId = setInterval( () => this.messageGenerator(), 3000)
       this.setState({
         clearInterval: clearId
       })  
