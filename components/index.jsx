@@ -436,7 +436,7 @@ class Admin extends React.Component {
             label="Number of Users (max 5000)"
             s={12}
             />
-          <Button onClick={() => { setInterval(this.generateUsersClickHandler(), 10000)}}>Generate Users</Button>
+          <Button onClick={() => this.generateUsersClickHandler()}>Generate Users</Button>
         </div>
       </Col>
     );
