@@ -282,7 +282,7 @@ class Admin extends React.Component {
       };
 
       const loop = () => {
-        const randomTime = Math.round(Math.random() * (300 - 100));
+        const randomTime = Math.round(Math.random() * (2000 - 500));
         const id = setTimeout(loopCallback.bind(this), randomTime);
         this.setState({autotradeTimeoutID: id});
       };
