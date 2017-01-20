@@ -22,7 +22,9 @@ class Admin extends React.Component {
       userNames: [],
       numberOfUsers: 0,
       autotradeTimeoutID: 0,
-      numberOfAutotrades: 0
+      numberOfAutotrades: 0,
+      numberOfMessages: 0,
+      allMessages: []
     };
     this.balanceListener();
     this.dataListener();
@@ -34,6 +36,8 @@ class Admin extends React.Component {
     });
 
     this.userList = client.record.getList('search?' + queryString);
+    this.messageGenerator = this.messageGenerator.bind(this);
+    this.setMessageNumber = this.setMessageNumber.bind(this);
   }
 
   
@@ -337,13 +341,47 @@ class Admin extends React.Component {
     this.setState(change);
   }
 
-  messageGenerator(number) {
-    var opening = ['just', '', '', '', '', 'ask me how i', 'completely', 'nearly', 'productively', 'efficiently', 'last night i', 'the president', 'that wizard', 'a ninja', 'a seedy old man'];
-    var verbs = ['drank', 'drunk', 'deployed', 'got', 'developed', 'built', 'invented', 'experienced', 'fought off', 'hardened', 'enjoyed', 'developed', 'consumed', 'debunked', 'drugged', 'doped', 'made', 'wrote', 'saw'];
-    var objects = ['my', 'your', 'the', 'a', 'my', 'an entire', 'this', 'that', 'the', 'the big', 'a new form of'];
-    var nouns = ['crypto', 'the man', 'trump', 'bitcoin', 'litecoin', 'dogecoin' 'cat', 'koolaid', 'system', 'city', 'worm', 'cloud', 'potato', 'money', 'way of life', 'belief system', 'security system', 'bad decision', 'future', 'life', 'pony', 'mind'];
-    var tags = ['#techlife', '#burningman', '#sf', 'but only i know how', 'for real', '#sxsw', '#ballin', '#omg', '#yolo', '#magic', '', '', '', ''];
+  messageGenerator() {
+    var opening = ['just', '', '', '', '', 'ask me how i', 'completely', 'nearly', 'productively', 'efficiently', 'last night i', 'the president', 'that wizard', 'a ninja', 'a seedy old man', 'the market', 'totally', 'the real satoshi nakimoto'];
+    var verbs = ['drank', 'drunk', 'deployed', 'got', 'developed', 'built', 'crashed', 'invented', 'experienced', 'fought off', 'hardened', 'enjoyed', 'developed', 'consumed', 'debunked', 'drugged', 'doped', 'made', 'wrote', 'saw', 'pump', 'dump', 'short', 'lost everything', 'fuck mt. gox'];
+    var objects = ['my', 'your', 'the', 'a', 'my', 'speculators', 'an entire', 'this', 'that', 'the', 'the big', 'a new form of'];
+    var nouns = ['crypto', 'the man', 'trump', 'bitcoin', 'litecoin', 'dogecoin', 'fiat currency', 'cat', 'koolaid', 'system', 'city', 'worm', 'cloud', 'trolls', 'potato', 'money', 'way of life', 'belief system', 'security system', 'bad decision', 'future', 'life', 'whales', 'mind'];
+    var storeMessages = [];
+    // var numberOfMessages = this.state.numberOfMessages;
+    var randomElement = function(array){
+      var randomIndex = Math.floor(Math.random() * array.length);
+        return array[randomIndex];
+    };
+    var randomMessage = function(){
+      return [randomElement(opening), randomElement(verbs), randomElement(objects), randomElement(nouns)].join(' ');
+    };
+    /*for (var i = 0; i < this.state.numberOfMessages; i++) {
+      var newMessage = randomMessage();
+      storeMessages.push(newMessage);   
+    }*/
+    var newMessage = randomMessage();
+    // storeMessages.push(newMessage);   
+    /*this.setState({
+      allMessages: storeMessages
+    })*/
+    console.log('newMessage is: ', newMessage);
+    const time = Date.now();
+    client.event.emit('trollbox-create-message', {
+      userID: 'testUser',
+      content: newMessage,
+      time: time
+    });
+    // console.log('storeMessages is: ', storeMessages);
+    // console.log(this.state.allMessages);
   }
+
+  setMessageNumber(e) {
+    var numOfMessages = Number(e.target.value);
+    this.setState({
+      numberOfMessages: numOfMessages
+    })
+  }
+/*<Input onChange={(e) => this.setMessageNumber(e)} placeholder="type number of messages to generate here"/>*/
 
   render() {
     const UserList = (
@@ -391,7 +429,7 @@ class Admin extends React.Component {
             label="Number of Users (max 5000)"
             s={12}
             />
-          <Button onClick={() => { this.generateUsersClickHandler() }}>Generate Users</Button>
+          <Button onClick={() => { setInterval(this.generateUsersClickHandler(), 10000)}}>Generate Users</Button>
         </div>
       </Col>
     );
@@ -463,8 +501,7 @@ class Admin extends React.Component {
 
     const trollboxMessages = (
       <Row>
-        <Input placeholder="type number of messages to generate here"/>
-        <Button onClick={(number) => generateMessages(number)}>Generate messages</Button>
+        <Button onClick={() => setInterval( ()=> this.messageGenerator(), 3000)}>Generate messages every 10 seconds</Button>
       </Row>
     );
 
