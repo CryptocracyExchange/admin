@@ -6,8 +6,8 @@ import request from 'superagent';
 import Big from 'big.js';
 import bcrypt from 'bcrypt-nodejs';
 
-const url = 'localhost'; // Need to change to production IP/URL when deploying
-// const url = '35.167.204.20';
+// const url = 'localhost'; // Need to change to production IP/URL when deploying
+const url = '35.167.204.20';
 const client = window.deepstream(`${url}:6020`);
 
 class Admin extends React.Component {
@@ -251,11 +251,11 @@ class Admin extends React.Component {
         // new lMax = (gMax - lastPrice)(random % between 10 and 25)
         const lMax = Big(pairs[pairName].gMax)
                         .minus(Big(pairs[pairName].lastPrice))
-                        .times(getRandomSmallInt(5, 15) / 100);
+                        .times(getRandomSmallInt(0.5, 3) / 100);
         // new lMin = (lastPrice - gMin)(random % between 10 and 25)
         const lMin = Big(pairs[pairName].lastPrice)
                         .minus(Big(pairs[pairName].gMin))
-                        .times(getRandomSmallInt(5, 15) / 100);
+                        .times(getRandomSmallInt(0.5, 3) / 100);
         // new order price = random number between lMax and lMin
         const price = getRandomBigInt(lMin, lMax).toString();
         const amount = 1; //getRandomSmallInt(1, 10); // Could base this off of the relative price of a pair...
@@ -282,7 +282,7 @@ class Admin extends React.Component {
       };
 
       const loop = () => {
-        const randomTime = Math.round(Math.random() * (15000 - 300));
+        const randomTime = Math.round(Math.random() * (300 - 100));
         const id = setTimeout(loopCallback.bind(this), randomTime);
         this.setState({autotradeTimeoutID: id});
       };
