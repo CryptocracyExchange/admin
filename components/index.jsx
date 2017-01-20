@@ -213,13 +213,14 @@ class Admin extends React.Component {
           min = Math.ceil(min);
           max = Math.floor(max);
           return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
+        };
+
         const getRandomBigInt = (min, max) => {
-          console.log(min, max);
-          min = Math.ceil(min);
-          max = Math.floor(max);
-          return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
+          min = Big(min);
+          max = Big(max);
+          return Big(Math.random()).times(max.minus(min).plus(1)).plus(min).toString();
+        };
+
         // randomly pick a user from the list of users in state
         const userName = this.state.userNames[getRandomSmallInt(0, this.state.userNames.length - 1)];
         // randomly pick a 'from' currency
