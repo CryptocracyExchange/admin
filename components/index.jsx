@@ -3,7 +3,7 @@ import ReactDom from 'react-dom';
 import _ from 'lodash';
 import { Row, Input, Navbar, NavItem, Icon, Button, Badge, Col, CollectionItem, Collection } from 'react-materialize';
 import request from 'superagent';
-import big from 'big.js';
+import Big from 'big.js';
 import bcrypt from 'bcrypt-nodejs';
 
 const url = 'localhost'; // Need to change to production IP/URL when deploying
@@ -223,9 +223,7 @@ class Admin extends React.Component {
         };
 
         const getRandomBigInt = (min, max) => {
-          min = Big(min);
-          max = Big(max);
-          return Big(Math.random()).times(max.minus(min).plus(1)).plus(min).toString();
+          return Big(Math.random()).times(max.minus(min).plus(1)).plus(min);
         };
 
         // randomly pick a user from the list of users in state
@@ -251,15 +249,19 @@ class Admin extends React.Component {
           return map.hasOwnProperty(fromCurrency) && map.hasOwnProperty(toCurrency);
         })[0]; // find matching pair name for obj lookup
         // new lMax = (gMax - lastPrice)(random % between 10 and 25)
-        const lMax = (pairs[pairName].gMax - pairs[pairName].lastPrice)*(getRandomSmallInt(5, 15) / 100);
+        const lMax = Big(pairs[pairName].gMax)
+                        .minus(Big(pairs[pairName].lastPrice))
+                        .times(getRandomSmallInt(5, 15) / 100);
         // new lMin = (lastPrice - gMin)(random % between 10 and 25)
-        const lMin = (pairs[pairName].lastPrice - pairs[pairName].gMin)*(getRandomSmallInt(5, 15) / 100);
+        const lMin = Big(pairs[pairName].lastPrice)
+                        .minus(Big(pairs[pairName].gMin))
+                        .times(getRandomSmallInt(5, 15) / 100);
         // new order price = random number between lMax and lMin
-        const price = getRandomBigInt(lMin, lMax);
+        const price = getRandomBigInt(lMin, lMax).toString();
         const amount = 1; //getRandomSmallInt(1, 10); // Could base this off of the relative price of a pair...
         const type = getRandomSmallInt(0,1) === 0 ? 'buy' : 'sell'; // This may be biased...
         return {
-          price: price,
+          price: +price,
           userID: userName,
           currFrom: fromCurrency,
           currTo: toCurrency,
