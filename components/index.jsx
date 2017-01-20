@@ -337,6 +337,14 @@ class Admin extends React.Component {
     this.setState(change);
   }
 
+  messageGenerator(number) {
+    var opening = ['just', '', '', '', '', 'ask me how i', 'completely', 'nearly', 'productively', 'efficiently', 'last night i', 'the president', 'that wizard', 'a ninja', 'a seedy old man'];
+    var verbs = ['drank', 'drunk', 'deployed', 'got', 'developed', 'built', 'invented', 'experienced', 'fought off', 'hardened', 'enjoyed', 'developed', 'consumed', 'debunked', 'drugged', 'doped', 'made', 'wrote', 'saw'];
+    var objects = ['my', 'your', 'the', 'a', 'my', 'an entire', 'this', 'that', 'the', 'the big', 'a new form of'];
+    var nouns = ['crypto', 'the man', 'trump', 'bitcoin', 'litecoin', 'dogecoin' 'cat', 'koolaid', 'system', 'city', 'worm', 'cloud', 'potato', 'money', 'way of life', 'belief system', 'security system', 'bad decision', 'future', 'life', 'pony', 'mind'];
+    var tags = ['#techlife', '#burningman', '#sf', 'but only i know how', 'for real', '#sxsw', '#ballin', '#omg', '#yolo', '#magic', '', '', '', ''];
+  }
+
   render() {
     const UserList = (
       <Row>
@@ -453,6 +461,13 @@ class Admin extends React.Component {
       </Col>
     );
 
+    const trollboxMessages = (
+      <Row>
+        <Input placeholder="type number of messages to generate here"/>
+        <Button onClick={(number) => generateMessages(number)}>Generate messages</Button>
+      </Row>
+    );
+
     // const data = (
     //     <Button onClick={() => this.getData()}>Get Data!</Button>
     //     {data}
@@ -476,6 +491,10 @@ class Admin extends React.Component {
             {balances}
             {trades}
           </Col>
+        </Row>
+        <Row>
+          <h4>Trollbox</h4>
+          {trollboxMessages}
         </Row>
       </div>
     );
