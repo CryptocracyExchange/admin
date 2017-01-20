@@ -24,7 +24,9 @@ class Admin extends React.Component {
       autotradeTimeoutID: 0,
       numberOfAutotrades: 0,
       numberOfMessages: 0,
-      allMessages: []
+      allMessages: [],
+      generateMessages: true,
+      clearInterval: ''
     };
     this.balanceListener();
     this.dataListener();
@@ -37,6 +39,7 @@ class Admin extends React.Component {
 
     this.userList = client.record.getList('search?' + queryString);
     this.messageGenerator = this.messageGenerator.bind(this);
+    this.messageGeneratorWrapper = this.messageGeneratorWrapper.bind(this);
     this.setMessageNumber = this.setMessageNumber.bind(this);
   }
 
@@ -390,6 +393,22 @@ class Admin extends React.Component {
   }
 /*<Input onChange={(e) => this.setMessageNumber(e)} placeholder="type number of messages to generate here"/>*/
 
+  messageGeneratorWrapper() {
+    this.setState({
+      generateMessages: !this.state.generateMessages
+    })
+    console.log('this.state.generateMessages is: ', this.state.generateMessages);
+    if (this.state.generateMessages) {
+      let clearId = setInterval( () => this.messageGenerator(), 3000)
+      this.setState({
+        clearInterval: clearId
+      })  
+    } else {
+      clearInterval(this.state.clearInterval);
+    }
+    
+  }
+
   render() {
     const UserList = (
       <Row>
@@ -508,7 +527,7 @@ class Admin extends React.Component {
 
     const trollboxMessages = (
       <Row>
-        <Button onClick={() => setInterval( ()=> this.messageGenerator(), 3000)}>Generate messages every 10 seconds</Button>
+        <Button onClick={this.messageGeneratorWrapper}>Toggle messages</Button>
       </Row>
     );
 
