@@ -7,7 +7,7 @@ import Big from 'big.js';
 import bcrypt from 'bcrypt-nodejs';
 
 // const url = 'localhost'; // Need to change to production IP/URL when deploying
-const url = '35.167.204.20';
+const url = '35.167.82.137';
 const client = window.deepstream(`${url}:6020`);
 
 class Admin extends React.Component {
@@ -282,7 +282,7 @@ class Admin extends React.Component {
       };
 
       const loop = () => {
-        const randomTime = Math.round(Math.random() * (2000 - 500));
+        const randomTime = Math.round(Math.random() * (30000 - 60000));
         const id = setTimeout(loopCallback.bind(this), randomTime);
         this.setState({autotradeTimeoutID: id});
       };
