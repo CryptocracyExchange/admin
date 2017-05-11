@@ -6,8 +6,8 @@ import request from 'superagent';
 import Big from 'big.js';
 import bcrypt from 'bcrypt-nodejs';
 
-// const url = 'localhost'; // Need to change to production IP/URL when deploying
-const url = '35.167.82.137';
+const url = 'localhost'; // Need to change to production IP/URL when deploying
+// const url = '35.167.82.137';
 const client = window.deepstream(`${url}:6020`);
 
 class Admin extends React.Component {
@@ -59,7 +59,7 @@ class Admin extends React.Component {
         if (!this.state.userData.hasOwnProperty(userRecordName)) {
           client.record.snapshot(`user/${userRecordName}`, (error, userData) => {
             client.record.snapshot(`balances/${userRecordName}`, (error, userBalances) => {
-              if (!error) {
+              if (!error && userData.userID !== 'demo' || userData.userID !== window.localStorage.getItem('cryptocracyuserID')) {
                 const newUser = {};
                 newUser[userRecordName] = {
                   username: userData.userID,
@@ -202,14 +202,14 @@ class Admin extends React.Component {
           gMin: 0.003
         },
         DOGEBTC: {
-          lastPrice: 4167348, // DOGE for 1 BTC
-          gMax: 5000000,
-          gMin: 3000000
+          lastPrice: 4, //4167348, // DOGE for 1 BTC
+          gMax: 50,
+          gMin: 3
         },
         DOGELTC: {
-          lastPrice: 18937, // DOGE for 1 LTC
-          gMax: 20000,
-          gMin: 16000
+          lastPrice: 18, //18937, // DOGE for 1 LTC
+          gMax: 20,
+          gMin: 16
         }
       }
 
@@ -226,8 +226,17 @@ class Admin extends React.Component {
           return Big(Math.random()).times(max.minus(min).plus(1)).plus(min);
         };
 
+        const getRandomUser = () => {
+          let userName = this.state.userNames[getRandomSmallInt(0, this.state.userNames.length - 1)];
+          while(userName === 'demo' || userName === window.localStorage.getItem('cryptocracyuserID')) {
+            userName = this.state.userNames[getRandomSmallInt(0, this.state.userNames.length - 1)];
+          }
+   
+          return userName;
+        }
+
         // randomly pick a user from the list of users in state
-        const userName = this.state.userNames[getRandomSmallInt(0, this.state.userNames.length - 1)];
+        const userName = getRandomUser();
         // randomly pick a 'from' currency
         const currencies = ["BTC", "LTC", "DOGE"];
         const fromCurrency = currencies.splice(getRandomSmallInt(0, currencies.length - 1), 1)[0];
@@ -282,7 +291,7 @@ class Admin extends React.Component {
       };
 
       const loop = () => {
-        const randomTime = Math.round(Math.random() * (30000 - 60000));
+        const randomTime = Math.round(Math.random() * (500)) + 500;
         const id = setTimeout(loopCallback.bind(this), randomTime);
         this.setState({autotradeTimeoutID: id});
       };
@@ -348,7 +357,7 @@ class Admin extends React.Component {
 
   messageGenerator() {
     var opening = ['just', '', '', '', '', 'ask me how i', 'completely', 'nearly', 'productively', 'efficiently', 'last night i', 'the president', 'that wizard', 'a ninja', 'a seedy old man', 'the market', 'totally', 'the real satoshi nakimoto'];
-    var verbs = ['drank', 'drunk', 'deployed', 'got', 'developed', 'built', 'crashed', 'invented', 'experienced', 'fought off', 'hardened', 'enjoyed', 'developed', 'consumed', 'debunked', 'drugged', 'doped', 'made', 'wrote', 'saw', 'pump', 'dump', 'short', 'lost everything', 'fuck mt. gox'];
+    var verbs = ['drank', 'drunk', 'deployed', 'got', 'developed', 'built', 'crashed', 'invented', 'experienced', 'fought off', 'hardened', 'enjoyed', 'developed', 'consumed', 'debunked', 'drugged', 'doped', 'made', 'wrote', 'saw', 'pump', 'dump', 'short', 'lost everything' ];
     var objects = ['my', 'your', 'the', 'a', 'my', 'speculators', 'an entire', 'this', 'that', 'the', 'the big', 'a new form of'];
     var nouns = ['crypto', 'the man', 'trump', 'bitcoin', 'litecoin', 'dogecoin', 'fiat currency', 'cat', 'koolaid', 'system', 'city', 'worm', 'cloud', 'trolls', 'potato', 'money', 'way of life', 'belief system', 'security system', 'bad decision', 'future', 'life', 'whales', 'mind'];
     var storeMessages = [];
@@ -366,7 +375,10 @@ class Admin extends React.Component {
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min + 1)) + min;
       };
-    const userName = this.state.userNames[getRandomSmallInt(0, this.state.userNames.length - 1)];
+    let userName = this.state.userNames[getRandomSmallInt(0, this.state.userNames.length - 1)];
+    while(userName === 'demo' || userName === window.localStorage.getItem('cryptocracyuserID')) {
+      userName = this.state.userNames[getRandomSmallInt(0, this.state.userNames.length - 1)];
+    }
     /*for (var i = 0; i < this.state.numberOfMessages; i++) {
       var newMessage = randomMessage();
       storeMessages.push(newMessage);   
@@ -376,7 +388,7 @@ class Admin extends React.Component {
     /*this.setState({
       allMessages: storeMessages
     })*/
-    console.log('newMessage is: ', newMessage);
+    // console.log('newMessage is: ', newMessage);
     const time = Date.now();
     client.event.emit('trollbox-create-message', {
       userID: userName,
@@ -438,8 +450,8 @@ class Admin extends React.Component {
                     </Col>
                   </Row>
                 </CollectionItem>
-                )
-              })}
+                )}
+              )}
             </ Collection>
           </div>
         </Col>
